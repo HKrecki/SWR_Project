@@ -104,11 +104,8 @@ int main(void)
 
   /* USER CODE BEGIN 2 */
 
-  printf("Hello world1!\n");
-  printf("Hello world2!\n");
+  printf("Hello world!\n");
 
-  //const char message[] = "Hello\r\n";
-  //HAL_UART_Transmit(&huart3, (uint8_t*)message, strlen(message), HAL_MAX_DELAY);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,6 +113,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  for(float i=0.0; i<10.0; i++){
+		  printf("Value: %f\n", i);
+		  HAL_Delay(1000);
+	  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
