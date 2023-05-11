@@ -50,14 +50,6 @@ uint16_t frame[834];
 float emissivity=0.95;
 int status;
 
-// I2C_HandleTypeDef hi2c2;
-// UART_HandleTypeDef huart3;
-
-uint8_t Buffer[25] = {0};
-uint8_t Space[] = " - ";
-uint8_t StartMSG[] = "Starting I2C Scanning: \r\n";
-uint8_t EndMSG[] = "Done! \r\n\r\n";
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -93,6 +85,50 @@ int __io_putchar(int ch)
 
   return 1;
 }
+
+void scan_i2c()
+{
+	uint8_t Buffer[25] = {0};
+	uint8_t Space[] = " - ";
+	uint8_t StartMSG[] = "Starting I2C Scanning: \r\n";
+	uint8_t EndMSG[] = "Done! \r\n\r\n";
+
+	uint8_t i = 0, ret;
+
+
+	// Start i2c scanning
+	/*i = 51;
+	printf("start i2c fcn");
+
+	ret = HAL_I2C_IsDeviceReady(&hi2c2,(uint16_t)(i<<1) , 3, 5);
+	if(ret != HAL_OK){
+		printf("No connection with 0x33\n");
+	}
+	else if(ret == HAL_OK){
+		printf("0x33 device reachable\n");
+	}
+	 */
+
+
+	for(i=1; i<128; i++)
+	    {
+			ret = HAL_I2C_IsDeviceReady(&hi2c2, (uint16_t)(i<<1), 3, 5);
+	        if (ret != HAL_OK)
+	        {
+	            HAL_UART_Transmit(&huart3, Space, sizeof(Space), 10000);
+	        }
+	        else if(ret == HAL_OK)
+	        {
+	            sprintf(Buffer, "0x%X", i);
+	            HAL_UART_Transmit(&huart3, Buffer, sizeof(Buffer), 10000);
+	        }
+	    }
+
+		HAL_UART_Transmit(&huart3, EndMSG, sizeof(EndMSG), 10000);
+
+
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -102,7 +138,6 @@ int __io_putchar(int ch)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -133,47 +168,40 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint8_t i = 0, ret;
+  //scan_i2c();
 
-      HAL_Delay(1000);
-
-      /*-[ I2C Bus Scanning ]-*/
-      HAL_UART_Transmit(&huart3, StartMSG, sizeof(StartMSG), 10000);
-      for(i=1; i<128; i++)
-      {
-          ret = HAL_I2C_IsDeviceReady(&hi2c2, (uint16_t)(i<<1), 3, 5);
-          if (ret != HAL_OK) /* No ACK Received At That Address */
-          {
-              HAL_UART_Transmit(&huart3, Space, sizeof(Space), 10000);
-          }
-          else if(ret == HAL_OK)
-          {
-              sprintf(Buffer, "0x%X", i);
-              HAL_UART_Transmit(&huart3, Buffer, sizeof(Buffer), 10000);
-          }
-      }
-      HAL_UART_Transmit(&huart3, EndMSG, sizeof(EndMSG), 10000);
-      /*--[ Scanning Done ]--*/
-
-
-
-  /*
   MLX90640_SetRefreshRate(MLX90640_ADDR, RefreshRate);
   MLX90640_SetChessMode(MLX90640_ADDR);
   paramsMLX90640 mlx90640;
   status = MLX90640_DumpEE(MLX90640_ADDR, eeMLX90640);
 
-  if (status != 0) printf("\r\nload system parameters error with code:%d\r\n",status);
+  printf("\nStart I2C check\n");
+
+  if (status != 0){
+	  printf("\r\nload system parameters error with code:%d\r\n",status);
+  }
+
   status = MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
-  if (status != 0) printf("\r\nParameter extraction failed with error code:%d\r\n",status);
 
-  printf("Start");
+  if (status != 0){
+	  printf("\r\nParameter extraction failed with error code:%d\r\n",status);
+  }
+  else{
+	  printf("\nTest ok\n");
+  }
 
-
-  */
   while (1)
   {
     /* USER CODE END WHILE */
+
+	/*
+	printf("start\r\n");
+	int status = MLX90640_GetFrameData(MLX90640_ADDR, frame);
+	if (status < 0)
+	{
+		printf("GetFrame Error: %d\r\n",status);
+	}
+	*/
 
     /* USER CODE BEGIN 3 */
   }
