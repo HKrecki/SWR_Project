@@ -75,6 +75,8 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+// printf to USART
 int __io_putchar(int ch)
 {
   if (ch == '\n') {
@@ -86,6 +88,9 @@ int __io_putchar(int ch)
   return 1;
 }
 
+// Check i2c connection works
+// 1 part Check is device of 0x33 address responds
+// 2 part print all responding devices
 void scan_i2c()
 {
 	uint8_t Buffer[25] = {0};
@@ -95,7 +100,7 @@ void scan_i2c()
 
 	uint8_t i = 0, ret;
 
-
+	// 1 part
 	// Start i2c scanning
 	/*i = 51;
 	printf("start i2c fcn");
@@ -109,7 +114,7 @@ void scan_i2c()
 	}
 	 */
 
-
+	// 2 part
 	for(i=1; i<128; i++)
 	    {
 			ret = HAL_I2C_IsDeviceReady(&hi2c2, (uint16_t)(i<<1), 3, 5);
@@ -168,14 +173,19 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+  // Wait for signal from application to start measurement
+
+
+  // Scan/check i2c bus works
   //scan_i2c();
 
+  // Camera init
   MLX90640_SetRefreshRate(MLX90640_ADDR, RefreshRate);
   MLX90640_SetChessMode(MLX90640_ADDR);
   paramsMLX90640 mlx90640;
   status = MLX90640_DumpEE(MLX90640_ADDR, eeMLX90640);
 
-  printf("\nStart I2C check\n");
+  // printf("\nStart I2C check\n");
 
   if (status != 0){
 	  printf("\r\nload system parameters error with code:%d\r\n",status);
@@ -186,37 +196,59 @@ int main(void)
   if (status != 0){
 	  printf("\r\nParameter extraction failed with error code:%d\r\n",status);
   }
-  else{
-	  printf("\nTest ok\n");
+
+  if (status == 0){
+	  printf("\nConfiguration process finished, waiting for input(1) \n");
   }
+
+  HAL_Delay(1000);
+
+  uint8_t value = 0;
+
+  while(value != 49)
+  {
+  	HAL_UART_Receive(&huart3, &value, 1, HAL_MAX_DELAY);
+  	printf("Received data: %u\n", value);
+  }
+
+  printf("Measurement starts\n");
 
   while (1)
   {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		printf("start\r\n");
-		int status = MLX90640_GetFrameData(MLX90640_ADDR, frame);
-		if (status < 0)
-		{
-			printf("GetFrame Error: %d\r\n",status);
-		}
-		float vdd = MLX90640_GetVdd(frame, &mlx90640);
-		float Ta = MLX90640_GetTa(frame, &mlx90640);
 
-		float tr = Ta - TA_SHIFT; //Reflected temperature based on the sensor ambient temperature
+	// Get frames from camera
+    //printf("start\r\n");
+	int status = MLX90640_GetFrameData(MLX90640_ADDR, frame);
+	if (status < 0)
+	{
+		printf("GetFrame Error: %d\r\n",status);
+	}
+
+	float vdd = MLX90640_GetVdd(frame, &mlx90640);
+	float Ta = MLX90640_GetTa(frame, &mlx90640);
+
+	float tr = Ta - TA_SHIFT; //Reflected temperature based on the sensor ambient temperature
 	//	printf("vdd:  %f Tr: %f\r\n",vdd,tr);
-		MLX90640_CalculateTo(frame, &mlx90640, emissivity , tr, mlx90640To);
-		printf("end\r\n");
-		printf("\r\n==========================WaveShare==========================\r\n");
-		for(int i = 0; i < 768; i++){
-			if(i%32 == 0 && i != 0){
-				printf("\r\n");
-			}
-			printf("%2.2f ",mlx90640To[i]);
-		}
-		printf("\r\n==========================WaveShare==========================\r\n");
+	MLX90640_CalculateTo(frame, &mlx90640, emissivity , tr, mlx90640To);
+	//printf("end\r\n");
 
+	//printf("\r\n==========================WaveShare==========================\r\n");
+	// start ramki
+	printf("\r\ns\r\n");
+	for(int i = 0; i < 768; i++){
+		if(i%32 == 0 && i != 0){
+			printf("\r\n");
+		}
+		printf("%2.2f ",mlx90640To[i]);
+	}
+	//printf("\r\n==========================WaveShare==========================\r\n");
+	printf("\r\ne\r\n");
+
+	// Aux delay
+	HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
