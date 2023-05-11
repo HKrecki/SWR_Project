@@ -41,7 +41,7 @@
 #define  FPS32HZ  0x06
 
 #define  MLX90640_ADDR 0x33
-#define	 RefreshRate FPS16HZ
+#define	 RefreshRate FPS4HZ
 #define  TA_SHIFT 8 //Default shift for MLX90640 in open air
 
 static uint16_t eeMLX90640[832];
@@ -194,16 +194,29 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-	/*
-	printf("start\r\n");
-	int status = MLX90640_GetFrameData(MLX90640_ADDR, frame);
-	if (status < 0)
-	{
-		printf("GetFrame Error: %d\r\n",status);
-	}
-	*/
-
     /* USER CODE BEGIN 3 */
+		printf("start\r\n");
+		int status = MLX90640_GetFrameData(MLX90640_ADDR, frame);
+		if (status < 0)
+		{
+			printf("GetFrame Error: %d\r\n",status);
+		}
+		float vdd = MLX90640_GetVdd(frame, &mlx90640);
+		float Ta = MLX90640_GetTa(frame, &mlx90640);
+
+		float tr = Ta - TA_SHIFT; //Reflected temperature based on the sensor ambient temperature
+	//	printf("vdd:  %f Tr: %f\r\n",vdd,tr);
+		MLX90640_CalculateTo(frame, &mlx90640, emissivity , tr, mlx90640To);
+		printf("end\r\n");
+		printf("\r\n==========================WaveShare==========================\r\n");
+		for(int i = 0; i < 768; i++){
+			if(i%32 == 0 && i != 0){
+				printf("\r\n");
+			}
+			printf("%2.2f ",mlx90640To[i]);
+		}
+		printf("\r\n==========================WaveShare==========================\r\n");
+
   }
   /* USER CODE END 3 */
 }
