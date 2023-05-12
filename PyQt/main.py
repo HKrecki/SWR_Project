@@ -5,6 +5,7 @@ import cv2
 from matplotlib import pyplot as plt
 import serial
 import Frame_data
+from matplotlib.animation import FuncAnimation
 
 class Frame_data:
     start_symbol = "default"
@@ -28,8 +29,15 @@ start_user_input = "default"
 while start_user_input != "":
     start_user_input = input("Press Enter to start measurement: ")
 
+
+fig,ax = plt.subplots(1,1)
+image = np.array([[20,21,22], [28,29,30], [31,32,33]])
+im = ax.imshow(image)
+
+
+
 # Connect to stm
-STM32F4 = serial.Serial('COM4', 115200, timeout=0.2)
+STM32F4 = serial.Serial('COM4', 115200, timeout=0.1)
 
 # Send command to STM to start measurement
 STM32F4.write(b'1')
@@ -86,8 +94,17 @@ while True:
                     print(frame_np_float)
                     print(type(frame_np_float))
 
-                    plt.imshow(frame_np_float, interpolation="nearest")
-                    plt.show()
+                    image = frame_np_float
+                    im.set_data(image)
+                    fig.canvas.draw_idle()
+                    plt.pause(0.1)
+
+                    #image = frame_np_float
+                    #im.set_data(image)
+                    #fig.canvas.draw_idle()
+                    #plt.pause(1)
+
+                    #im = plt.imshow(image)
 
 
                 #print("Line no. ", iterator, ", values: ", frame.frame_data[iterator])

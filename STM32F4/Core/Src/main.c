@@ -254,7 +254,7 @@ int main(void)
 	printf("\r\ne\r\n");
 
 	// Aux delay
-	HAL_Delay(1000);
+	HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
