@@ -235,16 +235,22 @@ int main(void)
 	MLX90640_CalculateTo(frame, &mlx90640, emissivity , tr, mlx90640To);
 	//printf("end\r\n");
 
-	//printf("\r\n==========================WaveShare==========================\r\n");
-	// start ramki
+	// Frame starts
 	printf("\r\ns\r\n");
 	for(int i = 0; i < 768; i++){
-		if(i%32 == 0 && i != 0){
-			printf("\r\n");
+
+		// Line starts
+		if(i%32 == 0){
+			printf("sl ");
 		}
+
 		printf("%2.2f ",mlx90640To[i]);
+
+		if(i%32 == 31){
+			printf("el\r\n");
+		}
 	}
-	//printf("\r\n==========================WaveShare==========================\r\n");
+
 	printf("\r\ne\r\n");
 
 	// Aux delay

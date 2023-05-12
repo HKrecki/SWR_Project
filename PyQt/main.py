@@ -6,6 +6,24 @@ from matplotlib import pyplot as plt
 import serial
 import Frame_data
 
+class Frame_data:
+    start_symbol = "default"
+    line_data = [-1]*32
+    end_symbol = "default"
+
+    frame_data = [line_data]*24
+
+    def print_frame(self):
+        print(self.start_symbol)
+        print(self.line_data)
+        print(self.end_symbol, "\n")
+
+    def is_frame_default(self):
+        if self.start_symbol == "default" and self.line_data == "default" and self.end_symbol == "default":
+            return True
+
+
+
 # User input to start communication
 start_user_input = "default"
 while start_user_input != "":
@@ -15,13 +33,45 @@ while start_user_input != "":
 STM32F4 = serial.Serial('COM4', 115200, timeout=0.2)
 
 # Send command to STM to start measurement
-##
-a = 49
 STM32F4.write(b'1')
 
+frame_started_flag = False
+frame_ended_flag = False
+
 while True:
+    frame = Frame_data
+
     data = STM32F4.readline()
-    print("Data: ", data)
+
+    # Frame starts
+    if data == b"s\r\r\n":
+        frame.start_symbol = "s"
+        frame_started_flag = True
+
+        #aux
+        print("Frame started")
+
+        # Read data in loop and save to 24 lines -> it's itereting 24 times
+        for i in frame.frame_data:
+            print(i)
+
+
+'''
+    # Line starts
+    if frame_started_flag == True:
+
+        data = str(data)
+        data = data.split(" ")
+
+        if data[0] == "b'sl" and data[-1] == "el\\r\\r\\n'" and len(data) == 34:
+            frame.line_data = data[1:33]
+            #print(frame.line_data)
+
+        print("Frame data: ")
+        print(frame.frame_data)
+'''
+
+
 
 
 
