@@ -100,21 +100,6 @@ void scan_i2c()
 
 	uint8_t i = 0, ret;
 
-	// 1 part
-	// Start i2c scanning
-	/*i = 51;
-	printf("start i2c fcn");
-
-	ret = HAL_I2C_IsDeviceReady(&hi2c2,(uint16_t)(i<<1) , 3, 5);
-	if(ret != HAL_OK){
-		printf("No connection with 0x33\n");
-	}
-	else if(ret == HAL_OK){
-		printf("0x33 device reachable\n");
-	}
-	 */
-
-	// 2 part
 	for(i=1; i<128; i++)
 	    {
 			ret = HAL_I2C_IsDeviceReady(&hi2c2, (uint16_t)(i<<1), 3, 5);
@@ -211,6 +196,14 @@ int main(void)
   	printf("Received data: %u\n", value);
   }
 
+  // TESTS - to check - getting not this data trough uart
+  // int refreshRt = MLX90640_GetRefreshRate(MLX90640_ADDR);
+
+  // printf("Debug data: \n");
+  // printf("Refresh rate: %d \n", refreshRt);
+  // TESTS
+
+
   printf("Measurement starts\n");
 
   while (1)
@@ -227,12 +220,15 @@ int main(void)
 		printf("GetFrame Error: %d\r\n",status);
 	}
 
-	float vdd = MLX90640_GetVdd(frame, &mlx90640);
+	// float vdd = MLX90640_GetVdd(frame, &mlx90640);
 	float Ta = MLX90640_GetTa(frame, &mlx90640);
 
 	float tr = Ta - TA_SHIFT; //Reflected temperature based on the sensor ambient temperature
-	//	printf("vdd:  %f Tr: %f\r\n",vdd,tr);
+	// printf("vdd:  %f Tr: %f\r\n",vdd,tr);
+
+	// DEBUG: Half data in mlx90640To
 	MLX90640_CalculateTo(frame, &mlx90640, emissivity , tr, mlx90640To);
+
 	//printf("end\r\n");
 
 	// Frame starts
@@ -280,8 +276,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 7;
   RCC_OscInitStruct.PLL.PLLR = 2;
@@ -294,7 +290,7 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLRCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
